@@ -1,0 +1,137 @@
+body {
+    background-color: #f8f9fa; /* Light background for better contrast */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* More modern font */
+    color: #333; /* Dark text for readability */
+}
+
+.navbar {
+    margin-bottom: 20px; /* Space below the navbar */
+}
+
+.container {
+    max-width: 900px; /* Increased max-width for better content distribution */
+    margin: auto; /* Center the container */
+}
+
+h2 {
+    margin-bottom: 20px; /* Space below the heading */
+    text-align: center; /* Center the heading */
+    font-size: 28px; /* Larger heading size */
+    color: #212529; /* Darker color for the heading */
+}
+
+.form-row {
+    justify-content: center; /* Center align search form elements */
+}
+
+.card {
+    transition: transform 0.2s; /* Smooth scale effect */
+}
+
+.card:hover {
+    transform: scale(1.02); /* Scale effect on hover */
+}
+
+.text-danger {
+    color: #dc3545; /* Bootstrap danger color */
+}
+
+.btn {
+    margin-top: 10px; /* Space above buttons */
+}
+
+/* Adjustments for input fields */
+input#searchQuery {
+    width: 100%; /* Full width for the search input */
+    max-width: 400px; /* Limit width on larger screens */
+}
+
+select#deviceTypeFilter {
+    width: auto; /* Auto width for the dropdown */
+    max-width: 150px; /* Limit dropdown width */
+}
+
+.search-form {
+    background-color: #ffffff; /* White background for the form */
+    padding: 15px; /* Increased padding for a more comfortable layout */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Slightly deeper shadow */
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Center items vertically */
+    gap: 10px; /* Space between elements */
+}
+.form-control{
+    border: 1px solid #ced4da; /* Custom border */
+    border-radius: 5px;
+}
+.search-form .form-control {
+    border: 1px solid #ced4da; /* Custom border */
+    border-radius: 5px; /* Rounded borders */
+}
+
+.search-form .form-control:focus {
+    border-color: #007bff; /* Blue border on focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Focus shadow */
+}
+
+.search-form .btn {
+    background-color: #007bff; /* Primary button color */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded button */
+    padding: 10px 20px; /* Padding around the text */
+    font-weight: bold; /* Bold text for buttons */
+}
+
+.search-form .btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+/* Responsive design adjustments */
+@media (max-width: 576px) {
+    .search-form {
+        flex-direction: column; /* Stack items in a column */
+        align-items: stretch; /* Stretch items to fill the row */
+    }
+    .search-form .form-control,
+    .search-form .btn {
+        width: 100%; /* Full width for inputs and buttons on small screens */
+    }
+    input#searchQuery {
+        max-width: none; /* Remove max-width restriction */
+    }
+}
+.bt1 {
+    background-color: #FFFFFF;
+    border: 0;
+    border-radius: .5rem;
+    box-sizing: border-box;
+    color: #111827;
+    font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: 0.75rem 2rem;
+    text-align: center;
+    text-decoration: none #D1D5DB solid;
+    text-decoration-thickness: auto;
+    margin: 20px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.bt1:hover {
+  background-color: rgb(249,250,251);
+}
+
+.bt1:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.bt1:focus-visible {
+  box-shadow: none;
+}
