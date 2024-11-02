@@ -101,7 +101,7 @@ function formatMacAddress(input) {
 
 // Function to populate the switch dropdown
 function populateSwitchDropdown() {
-    const switchSelect = document.getElementById('cameraSwitch');
+    const switchSelect = document.getElementById('editSwitch');
     switchSelect.innerHTML = '<option value="">Select Switch</option>'; // Clear dropdown
 
     const switches = devices.filter(device => device.type === 'switch');
@@ -112,6 +112,7 @@ function populateSwitchDropdown() {
         switchSelect.appendChild(option);
     });
 }
+
 
 // Function to populate port options based on selected switch
 function populatePortOptions() {
@@ -213,14 +214,18 @@ function openEditModal(index) {
     document.getElementById('editIP').value = device.ip;
     document.getElementById('editLocation').value = device.location;
     document.getElementById('editMAC').value = device.mac;
-    document.getElementById('editSwitch').value = device.connectedSwitch || '';
     document.getElementById('editIndex').value = index;
 
-    // Populate the switch ports if connected
-    populateEditPortOptions(device.connectedSwitch, device.switchPort);
-    
-    $('#editDeviceModal').modal('show'); // Using Bootstrap's jQuery to show the modal
+    // Populate the switch dropdown and set the selected switch
+    populateSwitchDropdown();
+    if (device.type === 'camera') {
+        document.getElementById('editSwitch').value = device.connectedSwitch || '';
+        populateEditPortOptions(device.connectedSwitch, device.switchPort);
+    }
+
+    $('#editDeviceModal').modal('show'); // Show the modal
 }
+
 
 // Function to populate edit port options
 function populateEditPortOptions(connectedSwitch, selectedPort) {
@@ -239,6 +244,7 @@ function populateEditPortOptions(connectedSwitch, selectedPort) {
     }
 }
 
+
 // Function to save changes made in the edit modal
 function saveDeviceChanges() {
     const index = document.getElementById('editIndex').value;
@@ -256,6 +262,8 @@ function saveDeviceChanges() {
 
 // Populate switch options and set up event listeners on page load
 window.onload = function() {
+    devices = getDevices(); // Load existing devices
+    searchDevice(); // Display devices on page load
     populateSwitchDropdown();
     document.getElementById('deviceType').addEventListener('change', toggleForms);
     document.getElementById('cameraSwitch').addEventListener('change', populatePortOptions);
