@@ -156,17 +156,46 @@ function searchDevice(event) {
     filteredDevices.forEach((device, index) => {
         const deviceDiv = document.createElement('div');
         deviceDiv.classList.add('card', 'mb-3');
-        deviceDiv.innerHTML = `
-            <div class="card-body">
-                <h5 class="card-title">${device.brand} (${device.type})</h5>
-                <p class="card-text">IP: ${device.ip}<br>MAC: ${device.mac}<br>Location: ${device.location}</p>
-                <button class="bt1" onclick="openEditModal(${index})">Edit</button>
-                <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
-            </div>
-        `;
+
+        if (device.type === 'camera') {
+            const connectedSwitch = devices.find(d => d.brand === device.connectedSwitch && d.type === 'switch');
+            deviceDiv.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">${device.brand}</h5>
+                    <p class="card-text">
+                        IP: ${device.ip}<br>
+                        MAC: ${device.mac}<br>
+                        Location: ${device.location}<br>
+                        Switch: ${connectedSwitch ? connectedSwitch.brand : 'Not Connected'}<br>
+                        Switch IP: ${connectedSwitch ? connectedSwitch.ip : 'N/A'}<br>
+                        Port: ${device.switchPort ? device.switchPort : 'N/A'}
+                    </p>
+                    <button class="bt1" onclick="openEditModal(${index})">Edit</button>
+                    <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
+                </div>
+            `;
+        }
+         else if (device.type === 'switch') {
+            deviceDiv.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">${device.brand} ${device.ports} Ports Switch</h5>
+                    <p class="card-text">
+                        IP: ${device.ip}<br>
+                        MAC: ${device.mac}<br>
+                        Location: ${device.location}
+                    </p>
+                    <button class="bt1" onclick="openEditModal(${index})">Edit</button>
+                    <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
+                </div>
+            `;
+        }
+        
+
         resultsContainer.appendChild(deviceDiv);
     });
 }
+
+
 
 // Function to delete a device
 function deleteDevice(index) {
