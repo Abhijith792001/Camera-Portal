@@ -9,7 +9,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-        <a class="navbar-brand" href="#">Asset Management</a>
+        <a class="navbar-brand" href="#">Camera Management</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -37,61 +37,79 @@
             <button class="bt1" type="submit">Search</button>
         </form>
 
-        <div id="searchResults" class="mt-4">
-            <!-- Search results will be displayed here -->
-        </div>
+        <div id="searchResults" class="mt-4"></div>
     </div>
 
     <!-- Edit Device Modal -->
-<div class="modal fade" id="editDeviceModal" tabindex="-1" role="dialog" aria-labelledby="editDeviceModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editDeviceModalLabel">Edit Device</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="editDeviceForm">
-                    <div class="form-group">
-                        <label for="editBrand">Brand</label>
-                        <input type="text" class="form-control" id="editBrand" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editIP">IP Address</label>
-                        <input type="text" class="form-control" id="editIP" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editLocation">Location</label>
-                        <input type="text" class="form-control" id="editLocation" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editMAC">MAC Address</label>
-                        <input type="text" class="form-control" id="editMAC" maxlength="17" placeholder="00:00:00:00:00:00" required readonly>
-                        <small class="form-text text-muted">Format: 00:00:00:00:00:00</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="editSwitch">Connected Switch</label>
-                        <select id="editSwitch" class="form-control" onchange="populateEditPortOptions(this.value)">
-                            <!-- Options will be populated dynamically -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editPort">Switch Port</label>
-                        <select id="editPort" class="form-control"></select>
-                    </div>
-                    <input type="hidden" id="editIndex">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="bt1" onclick="saveDeviceChanges()">Save Changes</button>
+    <div class="modal fade" id="editDeviceModal" tabindex="-1" role="dialog" aria-labelledby="editDeviceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editDeviceModalLabel">Edit Device</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDeviceForm">
+                        <div class="form-group">
+                            <label for="editBrand">Brand</label>
+                            <input type="text" class="form-control" id="editBrand" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editIP">IP Address</label>
+                            <input type="text" class="form-control" id="editIP" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLocation">Location</label>
+                            <input type="text" class="form-control" id="editLocation" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editMAC">MAC Address</label>
+                            <input type="text" class="form-control" id="editMAC" maxlength="17" placeholder="00:00:00:00:00:00" required readonly>
+                            <small class="form-text text-muted">Format: 00:00:00:00:00:00</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="editSwitch">Connected Switch</label>
+                            <select id="editSwitch" class="form-control" onchange="populateEditPortOptions(this.value)">
+                                <option value="">Select Switch</option>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPort">Switch Port</label>
+                            <select id="editPort" class="form-control"></select>
+                        </div>
+                        <input type="hidden" id="editIndex">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDeviceChanges()">Save Changes</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- Connected Cameras Modal -->
+    <div class="modal fade" id="connectedCamerasModal" tabindex="-1" role="dialog" aria-labelledby="connectedCamerasModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="connectedCamerasModalLabel">Connected Cameras</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="cameraList">
+                    <!-- Camera list will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
