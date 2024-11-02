@@ -101,7 +101,7 @@ function formatMacAddress(input) {
 
 // Function to populate the switch dropdown
 function populateSwitchDropdown() {
-    const switchSelect = document.getElementById('editSwitch');
+    const switchSelect = document.getElementById('cameraSwitch');
     switchSelect.innerHTML = '<option value="">Select Switch</option>'; // Clear dropdown
 
     const switches = devices.filter(device => device.type === 'switch');
@@ -112,7 +112,6 @@ function populateSwitchDropdown() {
         switchSelect.appendChild(option);
     });
 }
-
 
 // Function to populate port options based on selected switch
 function populatePortOptions() {
@@ -213,21 +212,32 @@ function openEditModal(index) {
     document.getElementById('editBrand').value = device.brand;
     document.getElementById('editIP').value = device.ip;
     document.getElementById('editLocation').value = device.location;
-    document.getElementById('editMAC').value = device.mac;
+    document.getElementById('editMAC').value = device.mac; // Read-only
     document.getElementById('editIndex').value = index;
 
-    // Populate the switch dropdown and set the selected switch
-    populateSwitchDropdown();
-    if (device.type === 'camera') {
-        document.getElementById('editSwitch').value = device.connectedSwitch || '';
-        populateEditPortOptions(device.connectedSwitch, device.switchPort);
-    }
-
-    $('#editDeviceModal').modal('show'); // Show the modal
+    // Populate connected switch options
+    populateEditSwitchOptions(device.connectedSwitch);
+    populateEditPortOptions(device.connectedSwitch, device.switchPort);
+    
+    $('#editDeviceModal').modal('show'); // Using Bootstrap's jQuery to show the modal
 }
 
+// Function to populate edit switch options
+function populateEditSwitchOptions(selectedSwitch) {
+    const switchSelect = document.getElementById('editSwitch');
+    switchSelect.innerHTML = '<option value="">Select Switch</option>'; // Clear previous options
 
-// Function to populate edit port options
+    const switches = devices.filter(device => device.type === 'switch');
+    switches.forEach(switchDevice => {
+        const option = document.createElement('option');
+        option.value = switchDevice.brand; // Use brand or IP as needed
+        option.text = `${switchDevice.brand} (${switchDevice.ip})`; // Display both brand and IP
+        switchSelect.appendChild(option);
+    });
+    switchSelect.value = selectedSwitch; // Set the selected switch
+}
+
+// Function to populate edit port options based on selected switch
 function populateEditPortOptions(connectedSwitch, selectedPort) {
     const editPortSelect = document.getElementById('editPort');
     editPortSelect.innerHTML = ''; // Clear previous options
@@ -262,8 +272,6 @@ function saveDeviceChanges() {
 
 // Populate switch options and set up event listeners on page load
 window.onload = function() {
-    devices = getDevices(); // Load existing devices
-    searchDevice(); // Display devices on page load
     populateSwitchDropdown();
     document.getElementById('deviceType').addEventListener('change', toggleForms);
     document.getElementById('cameraSwitch').addEventListener('change', populatePortOptions);
