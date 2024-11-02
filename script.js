@@ -89,9 +89,14 @@ function clearDropdowns() {
 
 // Function to format MAC Address input
 function formatMacAddress(input) {
-    let value = input.value.replace(/[^0-9A-Fa-f:]/g, '');
-    if (value.length > 17) value = value.slice(0, 17);
-    input.value = value.toUpperCase();
+    // Remove all non-hexadecimal characters
+    let value = input.value.replace(/[^0-9A-Fa-f]/g, '');
+    
+    // Format the string into MAC address format
+    if (value.length > 12) value = value.slice(0, 12); // Limit to 12 hex digits
+    const formatted = value.match(/.{1,2}/g) ? value.match(/.{1,2}/g).join(':') : '';
+
+    input.value = formatted.toUpperCase(); // Set the input value to the formatted string
 }
 
 // Function to populate the switch dropdown
