@@ -1,205 +1,229 @@
+let devices = getDevices(); // Load existing devices from local storage
+
+// Function to get devices from local storage
 function getDevices() {
     return JSON.parse(localStorage.getItem('devices')) || [];
 }
-// Display search results in the index.html page
-function displayResults(results) {
-    const resultsDiv = document.getElementById('searchResults');
-    resultsDiv.innerHTML = ''; // Clear previous results
 
-    if (results.length === 0) {
-        resultsDiv.innerHTML = '<p class="text-danger">No devices found.</p>';
-    } else {
-        results.forEach((device, index) => {
-            // Format the device name for switches
-            const deviceName = device.type === 'switch' && device.ports 
-                ? `${device.brand} ${device.ports.length} Port switch` 
-                : device.brand;
-                
-            const deviceDetails = `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">${deviceName}</h5>
-                        <p class="card-text"><strong>IP:</strong> ${device.ip}</p>
-                        <p class="card-text"><strong>Location:</strong> ${device.location}</p>
-                        <p class="card-text"><strong>MAC:</strong> ${device.mac}</p>
-                        ${device.type === 'camera' ? `<p class="card-text"><strong>Connected to:</strong> ${device.switch} via port ${device.port}</p>` : ''}
-                        <button class="btn btn-primary" onclick="editDevice(${index})">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteDevice('${device.brand}')">Delete</button>
-                    </div>
-                </div>`;
-            resultsDiv.innerHTML += deviceDetails;
-        });
+// Function to save devices to local storage
+function saveDevices() {
+    localStorage.setItem('devices', JSON.stringify(devices));
+}
+
+// Function to add a device
+function addDevice() {
+    const deviceType = document.getElementById('deviceType').value;
+    const brand = deviceType === 'camera' ? document.getElementById('cameraBrand').value : document.getElementById('switchBrand').value;
+    const ip = deviceType === 'camera' ? document.getElementById('cameraIP').value : document.getElementById('switchIP').value;
+    const location = deviceType === 'camera' ? document.getElementById('cameraLocation').value : document.getElementById('switchLocation').value;
+    const mac = deviceType === 'camera' ? document.getElementById('cameraMAC').value : document.getElementById('switchMAC').value;
+
+    // Validate required fields
+    if (!validateDeviceFields(brand, ip, location, mac)) return;
+
+    // Check for unique IP or MAC address
+    if (isDeviceUnique(ip, mac)) {
+        if (deviceType === 'camera') {
+            const connectedSwitch = document.getElementById('cameraSwitch').value;
+            const switchPort = document.getElementById('cameraPort').value;
+            devices.push({ type: 'camera', brand, ip, location, mac, connectedSwitch, switchPort });
+        } else if (deviceType === 'switch') {
+            const ports = parseInt(document.getElementById('switchPorts').value, 10);
+            devices.push({ type: 'switch', brand, ip, location, mac, ports });
+            populateSwitchDropdown(); // Update dropdown after adding a switch
+        }
+
+        saveDevices();
+        alert(`${deviceType.charAt(0).toUpperCase() + deviceType.slice(1)} added successfully!`);
+        clearForm();
     }
 }
 
+// Function to validate device fields
+function validateDeviceFields(brand, ip, location, mac) {
+    if (!brand || !ip || !location || !mac) {
+        alert("Please fill in all required fields.");
+        return false;
+    }
+    return true;
+}
 
+// Function to check if device IP or MAC is unique
+function isDeviceUnique(ip, mac) {
+    if (devices.some(device => device.ip === ip)) {
+        alert("This IP address is already in use.");
+        return false;
+    }
+    if (devices.some(device => device.mac === mac)) {
+        alert("This MAC address is already in use.");
+        return false;
+    }
+    return true;
+}
+
+// Function to clear the form
+function clearForm() {
+    document.getElementById('deviceForm').reset();
+    toggleForms();
+}
+
+// Function to toggle forms based on selected device type
+function toggleForms() {
+    const deviceType = document.getElementById('deviceType').value;
+
+    document.getElementById('cameraForm').style.display = deviceType === 'camera' ? 'block' : 'none';
+    document.getElementById('switchForm').style.display = deviceType === 'switch' ? 'block' : 'none';
+
+    clearDropdowns();
+    if (deviceType === 'camera') {
+        populateSwitchDropdown();
+    }
+}
+
+// Function to clear dropdowns and reset values
+function clearDropdowns() {
+    document.getElementById('cameraSwitch').innerHTML = '<option value="">Select Switch</option>';
+    document.getElementById('cameraPort').innerHTML = '';
+    document.getElementById('switchIPAddress').value = '';
+}
+
+// Function to format MAC Address input
 function formatMacAddress(input) {
-    // Remove any non-hexadecimal characters
-    const value = input.value.replace(/[^0-9A-Fa-f]/g, '');
-
-    // Split into pairs and join with ':'
-    const formatted = value.match(/.{1,2}/g)?.join(':') || '';
-
-    // Set the input value to the formatted string
-    input.value = formatted.toUpperCase();
+    let value = input.value.replace(/[^0-9A-Fa-f:]/g, '');
+    if (value.length > 17) value = value.slice(0, 17);
+    input.value = value.toUpperCase();
 }
 
-function editDevice(index) {
-    const devices = getDevices();
-    const device = devices[index];
+// Function to populate the switch dropdown
+function populateSwitchDropdown() {
+    const switchSelect = document.getElementById('cameraSwitch');
+    switchSelect.innerHTML = '<option value="">Select Switch</option>'; // Clear dropdown
 
-    // Populate the form with the current device details
-    document.getElementById('editBrand').value = device.brand;
-    document.getElementById('editIP').value = device.ip;
-    document.getElementById('editLocation').value = device.location;
-    document.getElementById('editMAC').value = device.mac;
-    document.getElementById('editSwitch').value = device.switch || '';
-    document.getElementById('editPort').value = device.port || '';
-    document.getElementById('editIndex').value = index; // Store index for saving
-
-    // Show the modal
-    $('#editDeviceModal').modal('show');
-}
-function saveDeviceChanges() {
-    const index = document.getElementById('editIndex').value;
-    const devices = getDevices();
-
-    devices[index] = {
-        ...devices[index],
-        brand: document.getElementById('editBrand').value,
-        ip: document.getElementById('editIP').value,
-        location: document.getElementById('editLocation').value,
-        mac: document.getElementById('editMAC').value,
-        switch: document.getElementById('editSwitch').value,
-        port: document.getElementById('editPort').value,
-    };
-
-    localStorage.setItem('devices', JSON.stringify(devices));
-    alert(`Device with brand ${devices[index].brand} updated successfully.`);
-    $('#editDeviceModal').modal('hide'); // Close the modal
-    searchDevice(new Event('submit')); // Refresh search results
+    const switches = devices.filter(device => device.type === 'switch');
+    switches.forEach(switchDevice => {
+        const option = document.createElement('option');
+        option.value = switchDevice.brand; // Use brand or IP as needed
+        option.text = `${switchDevice.brand} (${switchDevice.ip})`; // Display both brand and IP
+        switchSelect.appendChild(option);
+    });
 }
 
+// Function to populate port options based on selected switch
+function populatePortOptions() {
+    const switchSelect = document.getElementById('cameraSwitch');
+    const selectedSwitch = devices.find(device => device.type === 'switch' && device.brand === switchSelect.value);
+    const portSelect = document.getElementById('cameraPort');
+    portSelect.innerHTML = ''; // Clear previous options
 
-// Function to search devices based on query and device type
+    if (selectedSwitch) {
+        for (let i = 1; i <= selectedSwitch.ports; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `Port ${i}`;
+            portSelect.appendChild(option);
+        }
+        document.getElementById('switchIPAddress').value = selectedSwitch.ip;
+    } else {
+        console.error("Selected switch not found in devices.");
+    }
+}
+
+// Function to search for devices
 function searchDevice(event) {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault();
     const query = document.getElementById('searchQuery').value.toLowerCase();
-    const deviceType = document.getElementById('deviceTypeFilter').value;
-    const devices = getDevices();
+    const typeFilter = document.getElementById('deviceTypeFilter').value;
+    const resultsContainer = document.getElementById('searchResults');
 
-    // Filter devices based on the search query and selected device type
-    const results = devices.filter(device => {
+    resultsContainer.innerHTML = ''; // Clear previous results
+
+    // Filter devices based on the search query and type
+    const filteredDevices = devices.filter(device => {
+        const matchesType = typeFilter ? device.type === typeFilter : true;
         const matchesQuery = device.ip.toLowerCase().includes(query) ||
                              device.mac.toLowerCase().includes(query) ||
                              device.location.toLowerCase().includes(query) ||
                              device.brand.toLowerCase().includes(query);
-
-        const matchesType = deviceType ? device.type === deviceType : true;
-
-        return matchesQuery && matchesType;
+        return matchesType && matchesQuery;
     });
 
-    displayResults(results);
-}
-function deleteDevice(brand) {
-    // Show a confirmation dialog before deleting
-    const confirmation = confirm(`Are you sure you want to delete the device with brand ${brand}?`);
-    if (confirmation) {
-        let devices = getDevices();
-        devices = devices.filter(device => device.brand.toLowerCase() !== brand.toLowerCase());
-        localStorage.setItem('devices', JSON.stringify(devices));
-        alert(`Device with brand ${brand} deleted successfully.`);
-        searchDevice(new Event('submit')); // Refresh search results
-    }
-}
-function clearSearch() {
-    console.log("Clear search function called");
-    document.getElementById('searchQuery').value = '';
-    document.getElementById('deviceTypeFilter').value = '';
-    const allDevices = getDevices();
-    console.log("Devices fetched: ", allDevices);
-    displayResults(allDevices);
-}
-function addDeviceToLocalStorage(device) {
-    const devices = getDevices();
-    devices.push(device);
-    localStorage.setItem('devices', JSON.stringify(devices));
-}
-
-function populateSwitchOptions() {
-    const switchSelect = document.getElementById('cameraSwitch');
-    switchSelect.innerHTML = ''; // Clear previous options
-    const devices = getDevices().filter(device => device.type === 'switch');
-
-    // Populate dropdown with added switches
-    devices.forEach(device => {
-        const option = document.createElement('option');
-        option.value = device.brand;
-        option.textContent = device.brand;
-        switchSelect.appendChild(option);
+    // Display results
+    filteredDevices.forEach((device, index) => {
+        const deviceDiv = document.createElement('div');
+        deviceDiv.classList.add('card', 'mb-3');
+        deviceDiv.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">${device.brand} (${device.type})</h5>
+                <p class="card-text">IP: ${device.ip}<br>MAC: ${device.mac}<br>Location: ${device.location}</p>
+                <button class="bt1" onclick="openEditModal(${index})">Edit</button>
+                <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
+            </div>
+        `;
+        resultsContainer.appendChild(deviceDiv);
     });
+}
 
-    // Populate port options if there is a selected switch
-    if (switchSelect.value) {
-        populatePortOptions();
+// Function to delete a device
+function deleteDevice(index) {
+    if (confirm("Are you sure you want to delete this device?")) {
+        devices.splice(index, 1); // Remove device from the array
+        saveDevices(); // Save the updated devices array
+        searchDevice(event); // Refresh search results
     }
 }
 
-function populatePortOptions() {
-    const switchBrand = document.getElementById('cameraSwitch').value;
-    const switchPortSelect = document.getElementById('cameraPort');
-    switchPortSelect.innerHTML = ''; // Clear previous options
+// Function to open the edit modal
+function openEditModal(index) {
+    const device = devices[index];
+    document.getElementById('editBrand').value = device.brand;
+    document.getElementById('editIP').value = device.ip;
+    document.getElementById('editLocation').value = device.location;
+    document.getElementById('editMAC').value = device.mac;
+    document.getElementById('editSwitch').value = device.connectedSwitch || '';
+    document.getElementById('editIndex').value = index;
 
-    // Find the selected switch and get its ports
-    const devices = getDevices();
-    const selectedSwitch = devices.find(device => device.type === 'switch' && device.brand === switchBrand);
+    // Populate the switch ports if connected
+    populateEditPortOptions(device.connectedSwitch, device.switchPort);
+    
+    $('#editDeviceModal').modal('show'); // Using Bootstrap's jQuery to show the modal
+}
 
-    if (selectedSwitch && selectedSwitch.ports) {
-        selectedSwitch.ports.forEach(port => {
+// Function to populate edit port options
+function populateEditPortOptions(connectedSwitch, selectedPort) {
+    const editPortSelect = document.getElementById('editPort');
+    editPortSelect.innerHTML = ''; // Clear previous options
+
+    const switchDevice = devices.find(device => device.brand === connectedSwitch && device.type === 'switch');
+    if (switchDevice) {
+        for (let i = 1; i <= switchDevice.ports; i++) {
             const option = document.createElement('option');
-            option.value = port;
-            option.textContent = port;
-            switchPortSelect.appendChild(option);
-        });
+            option.value = i;
+            option.textContent = `Port ${i}`;
+            editPortSelect.appendChild(option);
+        }
+        editPortSelect.value = selectedPort; // Set the selected port
     }
 }
 
-function addDevice() {
-    const deviceType = document.getElementById('deviceType').value;
-    const device = {
-        brand: deviceType === 'camera' ? document.getElementById('cameraBrand').value : document.getElementById('switchBrand').value,
-        ip: deviceType === 'camera' ? document.getElementById('cameraIP').value : document.getElementById('switchIP').value,
-        location: deviceType === 'camera' ? document.getElementById('cameraLocation').value : document.getElementById('switchLocation').value,
-        mac: deviceType === 'camera' ? document.getElementById('cameraMAC').value : document.getElementById('switchMAC').value,
-        type: deviceType,
-    };
+// Function to save changes made in the edit modal
+function saveDeviceChanges() {
+    const index = document.getElementById('editIndex').value;
+    devices[index].brand = document.getElementById('editBrand').value;
+    devices[index].ip = document.getElementById('editIP').value;
+    devices[index].location = document.getElementById('editLocation').value;
+    devices[index].mac = document.getElementById('editMAC').value;
+    devices[index].connectedSwitch = document.getElementById('editSwitch').value;
+    devices[index].switchPort = document.getElementById('editPort').value;
 
-    if (deviceType === 'camera') {
-        device.switch = document.getElementById('cameraSwitch').value;
-        device.port = document.getElementById('cameraPort').value;
-    } else if (deviceType === 'switch') {
-        const numPorts = parseInt(document.getElementById('switchPorts').value, 10);
-        device.ports = Array.from({ length: numPorts }, (_, i) => `Port ${i + 1}`);
-    }
-
-    addDeviceToLocalStorage(device);
-    alert(`${device.brand} added successfully.`);
-    document.getElementById('deviceForm').reset();
-    populateSwitchOptions(); // Refresh switch options after adding a device
+    $('#editDeviceModal').modal('hide'); // Hide the modal
+    saveDevices(); // Save updated devices to local storage
+    searchDevice(event); // Refresh search results
 }
 
-function toggleForms() {
-    const deviceType = document.getElementById('deviceType').value;
-    document.getElementById('cameraForm').style.display = deviceType === 'camera' ? 'block' : 'none';
-    document.getElementById('switchForm').style.display = deviceType === 'switch' ? 'block' : 'none';
-    populateSwitchOptions();
-}
-
-// Event listener for switch selection change to refresh ports
-document.getElementById('cameraSwitch').addEventListener('change', populatePortOptions);
-
-// Populate switch options on page load
+// Populate switch options and set up event listeners on page load
 window.onload = function() {
-    populateSwitchOptions();
+    populateSwitchDropdown();
+    document.getElementById('deviceType').addEventListener('change', toggleForms);
+    document.getElementById('cameraSwitch').addEventListener('change', populatePortOptions);
+    document.getElementById('searchForm').addEventListener('submit', searchDevice);
 };
