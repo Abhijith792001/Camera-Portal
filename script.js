@@ -89,7 +89,7 @@ function clearDropdowns() {
 
 // Function to format MAC Address input
 function formatMacAddress(input) {
-    let value = input.value.replace(/[^0-9A-Fa-f]/g, '');
+    let value = input.value.replace(/[^0-9A-Z]/g, '');
     if (value.length > 12) value = value.slice(0, 12);
     const formatted = value.match(/.{1,2}/g) ? value.match(/.{1,2}/g).join(':') : '';
     input.value = formatted.toUpperCase();
