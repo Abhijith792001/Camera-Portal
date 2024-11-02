@@ -89,14 +89,10 @@ function clearDropdowns() {
 
 // Function to format MAC Address input
 function formatMacAddress(input) {
-    // Remove all non-hexadecimal characters
     let value = input.value.replace(/[^0-9A-Fa-f]/g, '');
-    
-    // Format the string into MAC address format
-    if (value.length > 12) value = value.slice(0, 12); // Limit to 12 hex digits
+    if (value.length > 12) value = value.slice(0, 12);
     const formatted = value.match(/.{1,2}/g) ? value.match(/.{1,2}/g).join(':') : '';
-
-    input.value = formatted.toUpperCase(); // Set the input value to the formatted string
+    input.value = formatted.toUpperCase();
 }
 
 // Function to populate the switch dropdown
@@ -174,8 +170,7 @@ function searchDevice(event) {
                     <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
                 </div>
             `;
-        }
-         else if (device.type === 'switch') {
+        } else if (device.type === 'switch') {
             deviceDiv.innerHTML = `
                 <div class="card-body">
                     <h5 class="card-title">${device.brand} ${device.ports} Ports Switch</h5>
@@ -186,16 +181,33 @@ function searchDevice(event) {
                     </p>
                     <button class="bt1" onclick="openEditModal(${index})">Edit</button>
                     <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
+                    <button class="bt1" onclick="getConnectedCameras('${device.brand}')">Get Camera</button>
                 </div>
             `;
         }
-        
 
         resultsContainer.appendChild(deviceDiv);
     });
 }
 
+// Function to get connected cameras for a selected switch
+function getConnectedCameras(switchBrand) {
+    const connectedCameras = devices.filter(device => device.type === 'camera' && device.connectedSwitch === switchBrand);
+    const cameraList = document.getElementById('cameraList');
+    cameraList.innerHTML = ''; // Clear previous camera list
 
+    if (connectedCameras.length > 0) {
+        connectedCameras.forEach(camera => {
+            const cameraItem = document.createElement('div');
+            cameraItem.textContent = `${camera.brand} - IP: ${camera.ip}, MAC: ${camera.mac}`;
+            cameraList.appendChild(cameraItem);
+        });
+    } else {
+        cameraList.textContent = 'No cameras connected to this switch.';
+    }
+
+    $('#connectedCamerasModal').modal('show'); // Show the modal
+}
 
 // Function to delete a device
 function deleteDevice(index) {
