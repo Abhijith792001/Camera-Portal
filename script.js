@@ -166,20 +166,20 @@ function searchDevice(event) {
                         Switch IP: ${connectedSwitch ? connectedSwitch.ip : 'N/A'}<br>
                         Port: ${device.switchPort ? device.switchPort : 'N/A'}
                     </p>
-                    <button class="bt1" onclick="openEditModal(${index})">Edit</button>
+                    <button class="bt1" onclick="openEditModal(${index})">Edit Camera</button>
                     <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
                 </div>
             `;
         } else if (device.type === 'switch') {
             deviceDiv.innerHTML = `
                 <div class="card-body">
-                    <h5 class="card-title">${device.brand} ${device.ports} Ports Switch</h5>
+                    <h5 class="card-title">${device.brand} (${device.ports} Ports Switch)</h5>
                     <p class="card-text">
                         IP: ${device.ip}<br>
                         MAC: ${device.mac}<br>
                         Location: ${device.location}
                     </p>
-                    <button class="bt1" onclick="openEditModal(${index})">Edit</button>
+                    <button class="bt1" onclick="openEditModal(${index})">Edit Switch</button>
                     <button class="bt1" onclick="deleteDevice(${index})">Delete</button>
                     <button class="bt1" onclick="getConnectedCameras('${device.brand}')">Get Camera</button>
                 </div>
@@ -194,20 +194,52 @@ function searchDevice(event) {
 function getConnectedCameras(switchBrand) {
     const connectedCameras = devices.filter(device => device.type === 'camera' && device.connectedSwitch === switchBrand);
     const cameraList = document.getElementById('cameraList');
-    cameraList.innerHTML = ''; // Clear previous camera list
+    cameraList.innerHTML = ''; // Clear previous content
+
+    // Create table element
+    const table = document.createElement('table');
+    table.classList.add('table', 'table-bordered');
+
+    // Create table header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Brand</th>
+        <th>IP</th>
+        <th>MAC</th>
+        <th>Location</th>
+    `;
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    const tbody = document.createElement('tbody');
 
     if (connectedCameras.length > 0) {
         connectedCameras.forEach(camera => {
-            const cameraItem = document.createElement('div');
-            cameraItem.textContent = `${camera.brand} - IP: ${camera.ip}, MAC: ${camera.mac}`;
-            cameraList.appendChild(cameraItem);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${camera.brand}</td>
+                <td>${camera.ip}</td>
+                <td>${camera.mac}</td>
+                <td>${camera.location}</td>
+            `;
+            tbody.appendChild(row);
         });
     } else {
-        cameraList.textContent = 'No cameras connected to this switch.';
+        // If no cameras are connected, add a single row indicating that
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="4">No cameras connected to this switch.</td>';
+        tbody.appendChild(row);
     }
+
+    table.appendChild(tbody);
+    cameraList.appendChild(table); // Add the table to the camera list
 
     $('#connectedCamerasModal').modal('show'); // Show the modal
 }
+
+
 
 // Function to delete a device
 function deleteDevice(index) {
@@ -221,6 +253,7 @@ function deleteDevice(index) {
 // Function to open the edit modal
 function openEditModal(index) {
     const device = devices[index];
+    
     document.getElementById('editBrand').value = device.brand;
     document.getElementById('editIP').value = device.ip;
     document.getElementById('editLocation').value = device.location;
@@ -229,7 +262,15 @@ function openEditModal(index) {
 
     // Populate connected switch options
     populateEditSwitchOptions(device.connectedSwitch);
-    populateEditPortOptions(device.connectedSwitch, device.switchPort);
+
+    if (device.type === 'switch') {
+        document.getElementById('editSwitch').style.display = 'none'; // Hide connected switch dropdown
+        document.getElementById('editPort').style.display = 'none'; // Hide port dropdown
+    } else {
+        document.getElementById('editSwitch').style.display = 'block'; // Show connected switch dropdown
+        document.getElementById('editPort').style.display = 'block'; // Show port dropdown
+        populateEditPortOptions(device.connectedSwitch, device.switchPort);
+    }
     
     $('#editDeviceModal').modal('show'); // Using Bootstrap's jQuery to show the modal
 }
