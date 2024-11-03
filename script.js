@@ -89,7 +89,7 @@ function clearDropdowns() {
 
 // Function to format MAC Address input
 function formatMacAddress(input) {
-    let value = input.value.replace(/[^0-9A-Z]/g, '');
+    let value = input.value.replace(/[^0-9A-Fa-f]/g, '');
     if (value.length > 12) value = value.slice(0, 12);
     const formatted = value.match(/.{1,2}/g) ? value.match(/.{1,2}/g).join(':') : '';
     input.value = formatted.toUpperCase();
@@ -266,14 +266,27 @@ function populateEditPortOptions(connectedSwitch, selectedPort) {
     }
 }
 
+// Function to validate MAC Address format
+function isValidMacAddress(mac) {
+    const macFormat = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/; // Regex for MAC address
+    return macFormat.test(mac);
+}
 
 // Function to save changes made in the edit modal
 function saveDeviceChanges() {
     const index = document.getElementById('editIndex').value;
+    const newMac = document.getElementById('editMAC').value;
+
+    // Validate the new MAC address
+    if (!isValidMacAddress(newMac)) {
+        alert("Please enter a valid MAC address in the format XX:XX:XX:XX:XX:XX.");
+        return;
+    }
+
     devices[index].brand = document.getElementById('editBrand').value;
     devices[index].ip = document.getElementById('editIP').value;
     devices[index].location = document.getElementById('editLocation').value;
-    devices[index].mac = document.getElementById('editMAC').value;
+    devices[index].mac = newMac; // Update MAC with the validated input
     devices[index].connectedSwitch = document.getElementById('editSwitch').value;
     devices[index].switchPort = document.getElementById('editPort').value;
 
@@ -288,4 +301,10 @@ window.onload = function() {
     document.getElementById('deviceType').addEventListener('change', toggleForms);
     document.getElementById('cameraSwitch').addEventListener('change', populatePortOptions);
     document.getElementById('searchForm').addEventListener('submit', searchDevice);
+    document.getElementById('cameraMAC').addEventListener('input', function() {
+        formatMacAddress(this);
+    });
+    document.getElementById('switchMAC').addEventListener('input', function() {
+        formatMacAddress(this);
+    });
 };
